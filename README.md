@@ -97,4 +97,55 @@ tmpfs                                401028      16    401012   1% /run/user/100
 
 root@testsrv:~# touch /mnt/var_test/file{1..20}
 
+root@testsrv:~# lvcreate -L 100M -s -n var_snap /dev/mapper/vg_var-lv_var
+  Logical volume "var_snap" created.
+
+root@testsrv:~# lvs
+  LV        VG        Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  ubuntu-lv ubuntu-vg -wi-ao----  10,00g
+  lv_var    vg_var    owi-aor--- 900,00m                                    100,00
+  var_snap  vg_var    swi-a-s--- 100,00m      lv_var 0,01
+
+root@testsrv:/mnt/var_test# ls
+file1   file12  file15  file18  file20  file5  file8
+file10  file13  file16  file19  file3   file6  file9
+file11  file14  file17  file2   file4   file7  lost+found
+
+root@testsrv:/mnt/var_test# rm file20
+root@testsrv:/mnt/var_test# rm file{15..19}
+
+root@testsrv:/mnt/var_test# ls
+file1  file10  file11  file12  file13  file14  file2  file3  file4  file5  file6  file7  file8  file9  lost+found
+
+root@testsrv:~# umount /mnt/var_test/
+root@testsrv:~# lvconvert --merge /dev/mapper/vg_var-var_snap
+  Merging of volume vg_var/var_snap started.
+  vg_var/lv_var: Merged: 100,00%
+root@testsrv:~# mount /dev/mapper/vg_var-lv_var /mnt/var_test/
+root@testsrv:~# ls -la /mnt/var_test/
+total 24
+drwxr-xr-x 3 root root  4096 ноя 17 09:40 .
+drwxr-xr-x 4 root root  4096 ноя 17 09:38 ..
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file1
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file10
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file11
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file12
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file13
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file14
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file15
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file16
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file17
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file18
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file19
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file2
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file20
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file3
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file4
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file5
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file6
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file7
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file8
+-rw-r--r-- 1 root root     0 ноя 17 09:40 file9
+drwx------ 2 root root 16384 ноя 17 09:33 lost+found
+```
 
